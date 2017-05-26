@@ -1,0 +1,47 @@
+
+/* Bayesian Network */
+
+%Tabular_Factor #assign P_W F1
+%Tabular_Factor #condition P_W 0
+
+%Tabular_Factor #assign P_I F2
+%Tabular_Factor #condition P_I 0
+
+%Tabular_Factor #assign P_M F3
+%Tabular_Factor #condition P_M 0
+
+%Tabular_Factor #multiply P_total 3 P_W P_I P_M
+%Tabular_Factor #marginalize P_total 1 I
+%Tabular_Factor #normalize P_total
+%Tabular_Factor #print P_total
+
+
+
+/* Dempster-Shafer Bayesian Network */
+
+%Tabular_DS_Factor #assign P_W F1
+%Tabular_Factor #condition P_W 0
+
+
+%Tabular_DS_Factor #assign P_I_0 F2
+%Tabular_DS_Factor #balloon P_I_0 1 W 0
+%Tabular_DS_Factor #condition P_I_0 0
+%Tabular_DS_Factor #assign P_I_1 F3
+%Tabular_DS_Factor #balloon P_I_1 1 W 1
+%Tabular_DS_Factor #condition P_I_1 0
+%Tabular_DS_Factor #multiply P_I 2 P_I_0 P_I_1
+
+
+%Tabular_DS_Factor #assign P_M_0 F4
+%Tabular_DS_Factor #balloon P_M_0 1 I 0 
+%Tabular_DS_Factor #condition P_M_0 0
+%Tabular_DS_Factor #assign P_M_1 F5
+%Tabular_DS_Factor #balloon P_M_1 1 I 1 
+%Tabular_DS_Factor #condition P_M_1 0
+%Tabular_DS_Factor #multiply P_M 2 P_M_0 P_M_1
+
+
+%Tabular_DS_Factor #multiply P_total 3 P_W P_I P_M
+%Tabular_DS_Factor #marginalize P_total 1 I
+%Tabular_DS_Factor #normalize P_total
+%Tabular_DS_Factor #print P_total 

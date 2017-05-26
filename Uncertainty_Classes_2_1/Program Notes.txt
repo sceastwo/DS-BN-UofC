@@ -1,0 +1,7 @@
+Empty arrays are created with a length of 0:
+
+int* x = new int[0];
+
+Variables are maintained by a "Variable_List". A global instance of "Variable_List" is refered to as "the_vars".
+
+With factors, arrays are stored using a linear array in which the index of the latter variables cycle the fastest.

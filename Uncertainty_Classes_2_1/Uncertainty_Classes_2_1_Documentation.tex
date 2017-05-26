@@ -1,0 +1,197 @@
+\documentclass{article}
+\usepackage{fullpage}
+\usepackage{amsmath}
+
+\title{Documentation for the Uncertainty Classes}
+\author{Shawn Eastwood}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{Text File Data Formats}
+
+Data related to the variables and factors will be read from \texttt{.txt} files. The data formats are listed below:
+
+
+\subsection{Tabular Classical Factor}
+
+\begin{verbatim}
+<number of variables N (int)>
+<variable name 1> <variable name 2> ... <variable name N>
+<factor value 1> <factor value 2> ... <factor value M>
+\end{verbatim}
+
+
+\section{Variable\_List}
+
+The class \texttt{Variable\_List} is a database of all existing variables, storing their names along with their domain sizes. A single global instance of \texttt{Variable\_List} named \texttt{the\_vars} is utilized by all subsequent classes.
+
+Within the scope of \texttt{Variable\_List} there is a private structure type \texttt{Variable} that simple stores a variable name (string) and the variable's domain size (int). The domain of a variable is simply \[\{0, 1, 2, \dots, \texttt{domain\_size} - 1\}\] The domain size must be \(\geq 1\).
+
+\texttt{Variable\_List} maintains the variable list as a pointer to an array of pointers to \texttt{Variable} structures. Variables are sequentially added to the list, and when the list is full, its length is increased by \texttt{LIST\_SIZE\_INCREMENT = 50}. Unused slots in the array store the \texttt{NULL} pointer. 
+
+Public methods used to interface with \texttt{Variable\_List} include:
+
+\begin{description}
+\item[\texttt{add\_variable(string name, int domain\_size)}:] Inserts a variable into the \texttt{Variable\_List}. 
+\item[\texttt{get\_domain\_size(string name)}:] Extracts the domain size of the provided variable name.
+\end{description}
+
+\subsection{Data Format}
+When a variable list is stored in ``.txt" file to be read into the program, the data format used is (the format is not sensitive to the amount or type of whitespace, as long as whitespace is present where indicated): 
+\begin{verbatim}
+<number of variables N (int)>
+<variable name 1 (string)> <domain size 1 (int)>
+<variable name 2 (string)> <domain size 2 (int)>
+...
+<variable name N (string)> <domain size N (int)>
+\end{verbatim}
+
+
+
+
+\section{Factor\_Template}
+
+The class \texttt{Factor\_Template} is a superclass for all factor types. The fields of \texttt{Factor\_Template} include:       
+
+\begin{description}
+\item[\texttt{int num\_of\_vars}:] The number of variables that comprise the factor. A factor can have 0 variables.
+
+\item[\texttt{string* factor\_var\_names}:] The array of variable names. The order in which the names occur affects how data is organized within the factor.
+
+\item[\texttt{int* var\_domain\_sizes}:] The array of domain sizes. The order corresponds to the order of \texttt{factor\_var\_names}. Even though the domain sizes can be looked up from \texttt{the\_vars}, storing the sizes locally within the factor is more computationally efficient.
+
+\item[\texttt{long int* var\_index\_increments}:] A tabular array indexed by the variables is stored in a linear fashion. \texttt{var\_index\_increments[i]} refers to the index increment that corresponds to a +1 increment in the value of variable \texttt{factor\_var\_names[i]}. In the linear array, the value of the last variable in \texttt{factor\_var\_names} cycles the fastest. Even though these increments can be computed by any method that needs them, storing these increments within the factor speeds up said methods. 
+\begin{align*}
+& \texttt{var\_index\_increments[num\_of\_vars - 1]} = 1 \\
+\forall i \in \{0, 1, \dots, \texttt{num\_of\_vars} - 2\}:\; & \texttt{var\_index\_increments[i]} \\
+& = \texttt{var\_domain\_sizes[i+1]} \times \texttt{var\_index\_increments[i+1]}
+\end{align*}
+\item[\texttt{long int num\_of\_vals}:] The total number of assignments to the factor's variables. \[\texttt{num\_of\_vals} = \texttt{var\_domain\_sizes[0]} \times \texttt{var\_index\_increments[0]}\]
+\end{description}
+
+Constructors implemented for \texttt{Factor\_Template} include:
+
+\begin{description}
+\item[\texttt{Factor\_Template()}:] Default constructor, creates a template factor with no variables.
+\item[\texttt{Factor\_Template(int new\_num\_of\_vars, string* new\_factor\_var\_names)}:] Creates a template factor from the provided parameters.
+\item[\texttt{Factor\_Template(istream\& in)}:] Creates a template factor from the provided input data stream (more on ``.txt" data formats below). 
+\item[\texttt{Factor\_Template(Factor\_Template\& existing\_factor)}:] The copy constructor.
+\item[\texttt{Factor\_Template\& operator=(Factor\_Template\& existing\_factor)}:] The overloaded assignment operator.
+\end{description}
+
+Public methods implemented for \texttt{Factor\_Template} include:
+
+\begin{description}
+\item[\texttt{void extract\_vars(int\& int\_out, string*\& array\_out)}:] Extracts both the number of variables and the variable array and returns them via the reference parameters.
+\item[\texttt{bool has\_var(string sought\_var)}:] Returns true if and only if the provided variable is present in the factor.
+\end{description}
+
+\subsection{Data Format}
+
+Importing data from a ``.txt" file is the most common way to generate factors. The format of the data that describes the contents of a \texttt{Factor\_Template} has the following form (the format is not sensitive to the amount or type of whitespace, as long as whitespace is present where indicated): 
+\begin{verbatim}
+<num_of_vars (int)>
+<factor_var_names[0] (string)> <factor_var_names[1] (string)> ... 
+        <factor_var_names[num_of_vars-1] (string)>
+\end{verbatim}
+
+
+
+
+\section{Tabular\_Factor}
+
+The class \texttt{Tabular\_Factor} inherits from the \texttt{Factor\_Template} class. A tabular factor stores its data in a tabular array indexed by its variables. The array is stored in a linear format and the index increments stored by the array \texttt{var\_index\_increments} are used to navigate the array. The new fields introduced by the \texttt{Tabular\_Factor} class include: 
+
+\begin{description}
+\item[\texttt{float* factor\_vals}:] The array of factor values. The array size is given by \texttt{num\_of\_vals}.
+\end{description}
+
+The same constructors for \texttt{Factor\_Template} exist with \texttt{Tabular\_Factor}. In cases where the initial factor values are not specified, all of the factor values are assigned \(1.0\). The additional constructors listed below also import data related to the factor values:
+\begin{description}
+\item[\texttt{Tabular\_Factor(istream\& in)}:] Creates a \texttt{Tabular\_Factor} from the provided input stream.
+\item[]\texttt{Tabular\_Factor(int new\_num\_of\_vars, string* new\_factor\_var\_names, float* new\_vals)}\textbf{:} A constructor that also requests information related to the factor values.
+\end{description}
+
+New public methods implemented for \texttt{Tabular\_Factor} include:
+
+\begin{description}
+\item[\texttt{void read\_vals(float* new\_vals)}:] Updates the factor's values using data from the provided array.
+\item[\texttt{void print(ostream\& out)}:] Prints the factor into the given output stream.
+\item[\texttt{void extract\_vals(long int\& long\_int\_out, float*\& array\_out)}:] Extracts both the number of factor values and the value array and returns them via reference parameters.
+\item[\texttt{Tabular\_Factor\& multiply(int num\_of\_factors, Tabular\_Factor** factor\_array)}:] Forms the product factor by multiplying together all factors referenced by the pointer array ``\texttt{factor\_array}". 
+\item[\texttt{void marginalize(string elim\_var\_name)}:] Sums the stated variable out of the factor. Throws an error if the variable does not exist in the factor.
+\item[\texttt{void condition(string cond\_var\_name, int cond\_val)}:] Removes the variable ``\texttt{cond\_var\_name}" by fixing it to the value ``\texttt{cond\_val}". Does nothing if the variable does not exist in the factor.
+\item[\texttt{void normalize()}:] Scales all factor values so that the values sum to 1.
+\end{description}
+
+\subsection{Data Format}
+
+Within a .txt file, the format expected for a \texttt{Tabular\_Factor} is (the format is not sensitive to the amount or type of whitespace, as long as whitespace is present where indicated):
+\begin{verbatim}
+<Factor_Template>
+<factor_vals[0] (float)> <factor_vals[1] (float)> ... 
+        <factor_vals[num_of_vals-1] (float)>
+\end{verbatim}
+The \texttt{<Factor\_Template>} field denotes the text representation for the data in the \texttt{Factor\_Template} superclass.
+
+
+
+
+\section{Tabular\_DS\_Factor}
+
+The class \texttt{Tabular\_DS\_Factor} inherits from the \texttt{Factor\_Template} class. A tabular DS factor stores each focal element as a tabular array of boolean values indexed by its variables. A value of \texttt{true} means that the variable assignment that indexes the current position in the array is contained in the focal element. Each array is stored in a linear format and the index increments stored in the array \text{var\_index\_increments} are used to navigate the array. The focal elements are themselves accessed from an array of pointers. The new fields introduced by the \texttt{Tabular\_DS\_Factor} class include:
+
+\begin{description}
+\item[\texttt{int num\_of\_focal\_elements}:] The number of focal elements contained by the current DS factor. There must always be at least 1 focal element.
+\item[\texttt{bool** focal\_elements}:] The array of pointers that reference the boolean arrays that denote the focal elements.
+\item[\texttt{float* focal\_element\_weights}:] The array of weights that correspond to the focal elements.
+\end{description}
+
+The same constructors for \texttt{Factor\_Template} exist with \texttt{Tabular\_DS\_Factor}. In cases where the initial focal elements are not specified, the vacuous DS model will be assumed. The additional constructors listed below also import data related to the focal elements:
+\begin{description}
+\item[\texttt{Tabular\_DS\_Factor(istream\& in)}:] Creates a \texttt{Tabular\_DS\_Factor} from the provided input stream.
+\item[]\texttt{Tabular\_DS\_Factor(int new\_num\_of\_vars, string* new\_factor\_var\_names, int new\_num\_of\_focal\_elements, bool** new\_focal\_elements, float* new\_focal\_element\_weights)}\textbf{:} A constructor that also requests information related to the focal elements.
+\end{description}
+
+New public methods implemented for \texttt{Tabular\_DS\_Factor} include:
+
+\begin{description}
+\item[\texttt{void print(ostream\& out)}:] Prints the DS factor into the given output stream.
+\item[]\texttt{void extract\_focal\_elements(long int\& domain\_size\_out, int\& num\_of\_focal\_elements\_out, bool**\& focal\_elements\_out, float*\& focal\_element\_weights\_out)}\textbf{:} Extracts the number of possible variable assignments; the number of focal elements; the focal elements themselves; and the focal element weights.
+\item[\texttt{void extend(int num\_of\_new\_vars, string* new\_vars)}:] Extends the factor to incorporate the new variables listed in the input array. Duplicate variables, or variables that are already part of the factor are simply ignored.
+\item[\texttt{Tabular\_DS\_Factor\& multiply(int num\_of\_factors, Tabular\_DS\_Factor** factor\_array)}:] Forms the product factor by multiplying together all factors referenced by the pointer array ``\texttt{factor\_array}".   
+\item[\texttt{void marginalize(string elim\_var\_name)}:] Marginalizes the stated variable out of the factor. Throws an error if the variable does not exist in the factor.
+\item[\texttt{void condition(string cond\_var\_name, int cond\_val)}:] Removes the variable ``\texttt{cond\_var\_name}" by fixing it to the value ``\texttt{cond\_val}". Does nothing if the variable does not exist in the factor.
+\item[\texttt{void normalize()}:] Scales all the focal element weights so that the weights all sum to 1.
+\end{description}
+
+\subsection{Data Format}
+
+Within a .txt file, the format expected for a \texttt{Tabular\_DS\_Factor} is (the format is not sensitive to the amount or type of whitespace, as long as whitespace is present where indicated):
+\begin{verbatim}
+<Factor_Template>
+<num_of_focal_elements (int)>
+<focal_element_weights[0] (float)> <focal_elements[0][0] (bool)> 
+        <focal_elements[0][1] (bool)> ... <focal_elements[0][num_of_vals-1] (bool)>
+<focal_element_weights[1] (float)> <focal_elements[1][0] (bool)> 
+        <focal_elements[1][1] (bool)> ... <focal_elements[1][num_of_vals-1] (bool)>
+<focal_element_weights[num_of_focal_elements-1] (float)> 
+        <focal_elements[num_of_focal_elements-1][0] (bool)> 
+        <focal_elements[num_of_focal_elements-1][1] (bool)> ... 
+        <focal_elements[num_of_focal_elements-1][num_of_vals-1] (bool)>
+\end{verbatim}
+The \texttt{<Factor\_Template>} field denotes the text representation for the data in the \texttt{Factor\_Template} superclass.
+
+\end{document}
+
+
+
+
+
+
+
+
+

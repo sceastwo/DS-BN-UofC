@@ -1,0 +1,114 @@
+/* Testing %Tabular_Factor #assign: */
+/* %Tabular_Factor #assign G1 F3
+%Tabular_Factor #print G1 */
+
+
+/* Testing %Tabular_Factor #multiply: */
+/* %Tabular_Factor #multiply G2 0 
+%Tabular_Factor #print G2
+
+%Tabular_Factor #multiply G2 1 F2
+%Tabular_Factor #print G2
+
+%Tabular_Factor #multiply G2 2 F2 F3
+%Tabular_Factor #print G2 */
+
+
+/* Testing %Tabular_Factor #marginalize: */
+/* %Tabular_Factor #assign G3 F4
+%Tabular_Factor #marginalize G3 0
+%Tabular_Factor #print G3
+
+%Tabular_Factor #marginalize G3 1 A
+%Tabular_Factor #print G3 
+
+%Tabular_Factor #marginalize G3 2 C D
+%Tabular_Factor #print G3 */
+
+
+/* Testing %Tabular_Factor #condition: */
+%Tabular_Factor #assign G4 F4
+%Tabular_Factor #condition G4 0
+%Tabular_Factor #print G4
+
+%Tabular_Factor #condition G4 1 B 2
+%Tabular_Factor #print G4 
+
+%Tabular_Factor #condition G4 2 C 0 D 1
+%Tabular_Factor #print G4
+
+
+/* Testing %Tabular_Factor #normalize: */
+/* %Tabular_Factor #assign G5 F3
+%Tabular_Factor #normalize G5
+%Tabular_Factor #print G5 */
+
+
+
+
+/* Testing %Tabular_DS_Factor #assign: */
+/* %Tabular_DS_Factor #assign G1 F3
+%Tabular_DS_Factor #print G1 */
+
+
+/* Testing %Tabular_DS_Factor #multiply: */
+/* %Tabular_DS_Factor #multiply G2 0 
+%Tabular_DS_Factor #print G2
+
+%Tabular_DS_Factor #multiply G2 1 F3
+%Tabular_DS_Factor #print G2
+
+%Tabular_DS_Factor #multiply G2 2 F3 F4
+%Tabular_DS_Factor #print G2
+
+%Tabular_DS_Factor #multiply G2 2 F1 F4
+%Tabular_DS_Factor #print G2
+
+%Tabular_DS_Factor #multiply G2 2 F2 F4
+%Tabular_DS_Factor #print G2 
+
+%Tabular_DS_Factor #multiply G2 3 F1 F4 F5
+%Tabular_DS_Factor #print G2 */
+
+
+
+
+/* Testing %Tabular_DS_Factor #marginalize: */
+/* %Tabular_DS_Factor #assign G3 F5 
+%Tabular_DS_Factor #marginalize G3 0
+%Tabular_DS_Factor #print G3 
+%Tabular_DS_Factor #marginalize G3 1 B
+%Tabular_DS_Factor #print G3 
+%Tabular_DS_Factor #assign G3 F5 
+%Tabular_DS_Factor #marginalize G3 2 A B 
+%Tabular_DS_Factor #print G3 */
+
+
+
+
+/* Testing %Tabular_DS_Factor #condition: */
+/* %Tabular_DS_Factor #assign G4 F5 
+%Tabular_DS_Factor #condition G4 0
+%Tabular_DS_Factor #print G4 
+%Tabular_DS_Factor #condition G4 1 D 1
+%Tabular_DS_Factor #print G4 
+%Tabular_DS_Factor #assign G4 F5 
+%Tabular_DS_Factor #condition G4 2 D 1 B 2
+%Tabular_DS_Factor #print G4 */
+
+
+
+
+/* Testing %Tabular_DS_Factor #balloon: */
+/* %Tabular_DS_Factor #assign G5 F3 
+%Tabular_DS_Factor #balloon G5 0
+%Tabular_DS_Factor #print G5 
+%Tabular_DS_Factor #balloon G5 1 B 1
+%Tabular_DS_Factor #print G5 
+
+%Tabular_DS_Factor #assign G5 F4 
+%Tabular_DS_Factor #print G5 
+%Tabular_DS_Factor #balloon G5 2 C 0 E 0
+%Tabular_DS_Factor #print G5 */
+
+

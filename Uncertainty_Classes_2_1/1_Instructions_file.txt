@@ -1,0 +1,41 @@
+/* Copy and condition each Tabular_Factor: */
+
+%Tabular_Factor #assign F1_temp F1
+%Tabular_Factor #condition F1_temp 2 B 0 D 0
+
+%Tabular_Factor #assign F2_temp F2
+%Tabular_Factor #condition F2_temp 2 B 0 D 0
+
+%Tabular_Factor #assign F3_temp F3
+%Tabular_Factor #condition F3_temp 2 B 0 D 0
+
+%Tabular_Factor #assign F4_temp F4
+%Tabular_Factor #condition F4_temp 2 B 0 D 0
+
+/* Form and marginalize the product: */
+
+%Tabular_Factor #multiply Fprod 4 F1_temp F2_temp F3_temp F4_temp
+%Tabular_Factor #marginalize Fprod 2 A C
+%Tabular_Factor #normalize Fprod 
+%Tabular_Factor #print Fprod
+
+
+
+/* Repeat for Tabular_DS_Factor: */
+
+%Tabular_DS_Factor #assign F1_temp F1
+%Tabular_DS_Factor #condition F1_temp 2 B 0 D 0
+
+%Tabular_DS_Factor #assign F2_temp F2
+%Tabular_DS_Factor #condition F2_temp 2 B 0 D 0
+
+%Tabular_DS_Factor #assign F3_temp F3
+%Tabular_DS_Factor #condition F3_temp 2 B 0 D 0
+
+%Tabular_DS_Factor #assign F4_temp F4
+%Tabular_DS_Factor #condition F4_temp 2 B 0 D 0
+
+%Tabular_DS_Factor #multiply Fprod 4 F1_temp F2_temp F3_temp F4_temp
+%Tabular_DS_Factor #marginalize Fprod 2 A C
+%Tabular_DS_Factor #normalize Fprod 
+%Tabular_DS_Factor #print Fprod
